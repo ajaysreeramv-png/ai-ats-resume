@@ -2,13 +2,9 @@
 // The API key is passed in by the caller and is never returned to the browser.
 
 export const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
-
-// Used when OPENROUTER_MODEL is not set. "openrouter/free" is OpenRouter's router
-// that picks from currently available free models. Set OPENROUTER_MODEL to pin a model.
 export const DEFAULT_MODEL = 'openrouter/free';
 
 export class AiError extends Error {
-  // status: HTTP status returned to the browser. upstreamStatus: what OpenRouter said (logged only).
   constructor({ code, status, message, retryable = false, upstreamStatus = null }) {
     super(message);
     this.name = 'AiError';
@@ -43,8 +39,7 @@ function mapHttpError(upstreamStatus) {
   }
 }
 
-// Sends one chat completion request. `deadline` is an epoch-ms cutoff so the whole
-// request chain stays under the Vercel function limit.
+// Sends one completion request and aborts before the Vercel function deadline.
 export async function callOpenRouter({ apiKey, model, messages, deadline, jsonMode = true }) {
   const timeoutMs = deadline - Date.now();
   if (timeoutMs < 1000) {
@@ -57,7 +52,8 @@ export async function callOpenRouter({ apiKey, model, messages, deadline, jsonMo
     new AiError({ code: 'AI_TIMEOUT', status: 504, message: 'The analysis took too long. Try again in a moment.', retryable: false });
 
   try {
-    const body = { model, messages, temperature: 0.2, max_tokens: 3000 };
+    // The prompt requests concise lists and short explanations to reduce generation time.
+    const body = { model, messages, temperature: 0.2, max_tokens: 2200 };
     if (jsonMode) body.response_format = { type: 'json_object' };
 
     let response;
@@ -65,7 +61,7 @@ export async function callOpenRouter({ apiKey, model, messages, deadline, jsonMo
       response = await fetch(OPENROUTER_URL, {
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${apiKey}`,
+          Authorization: \`Bearer \${apiKey}\`,
           'Content-Type': 'application/json',
           'X-Title': 'ResumeIQ',
         },
@@ -86,8 +82,6 @@ export async function callOpenRouter({ apiKey, model, messages, deadline, jsonMo
     }
 
     if (!response.ok) {
-      // Some free models reject JSON mode. Retry once without it; the response is still validated.
-      // Some models (or routers) reject JSON mode with 400 or 404. Retry once without it.
       const providerMessage = String(data?.error?.message ?? '');
       if (
         (response.status === 400 || response.status === 404) &&
@@ -99,7 +93,6 @@ export async function callOpenRouter({ apiKey, model, messages, deadline, jsonMo
       throw mapHttpError(response.status);
     }
 
-    // OpenRouter can report provider failures inside a 200 response.
     if (data?.error) {
       const code = Number(data.error.code);
       throw mapHttpError(Number.isFinite(code) && code >= 400 ? code : 502);

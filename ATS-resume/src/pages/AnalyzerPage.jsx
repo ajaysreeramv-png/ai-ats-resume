@@ -157,7 +157,7 @@ export default function AnalyzerPage() {
         <div className="mt-8 flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
           <p className="flex max-w-xl items-start gap-2.5 text-sm leading-relaxed text-muted">
             <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-glow" aria-hidden="true" />
-            Your extracted resume text and job description are sent to an AI model through OpenRouter to create the
+            Your extracted resume text and job description are sent securely to Google Gemini to create the
             report. ResumeIQ does not store them.
           </p>
           <button type="button" onClick={handleAnalyze} disabled={!ready} className="btn-primary sm:shrink-0">

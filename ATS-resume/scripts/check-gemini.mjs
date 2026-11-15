@@ -2,7 +2,7 @@
 // Usage: GEMINI_API_KEY=... npm run check:gemini
 // Optional: GEMINI_MODEL=... (defaults to gemini-2.5-flash). Prints no resume content and no key.
 import { runAnalysis } from '../lib/runAnalysis.js';
-import { DEFAULT_MODEL } from '../lib/openrouter.js';
+import { DEFAULT_MODEL } from '../lib/gemini.js';
 
 const apiKey = process.env.GEMINI_API_KEY?.trim();
 if (!apiKey) {

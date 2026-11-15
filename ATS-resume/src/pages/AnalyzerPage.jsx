@@ -92,7 +92,7 @@ export default function AnalyzerPage() {
   }
 
   if (result) {
-    return <ResultsDashboard analysis={result} onReset={handleReset} />;
+    return <ResultsDashboard analysis={result} resumeText={resumeText} onReset={handleReset} />;
   }
 
   const ready = Boolean(resumeText) && !extracting && !analyzing;

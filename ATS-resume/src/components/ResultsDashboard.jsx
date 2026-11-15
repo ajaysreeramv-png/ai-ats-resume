@@ -135,6 +135,10 @@ export default function ResultsDashboard({ analysis: a, onReset }) {
           <p className="mt-2 text-sm text-muted">Scores are estimates based on the job description you provided.</p>
         </div>
         <div className="flex flex-wrap gap-3">
+          <button type="button" onClick={handleGenerateSample} disabled={generatingSample || !resumeText} className="btn-primary">
+            {generatingSample ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <FileText className="h-4 w-4" aria-hidden="true" />}
+            {generatingSample ? 'Generating sample...' : sampleResume ? 'Sample resume generated' : 'Generate sample resume'}
+          </button>
           <button type="button" onClick={() => window.print()} className="btn-secondary">
             <Printer className="h-4 w-4" aria-hidden="true" />
             Print or save as PDF
@@ -145,6 +149,44 @@ export default function ResultsDashboard({ analysis: a, onReset }) {
           </button>
         </div>
       </div>
+
+      {sampleError && (
+        <p role="alert" className="no-print mt-6 rounded-xl border border-bad/30 bg-bad/10 p-4 text-sm text-bad">
+          {sampleError}
+        </p>
+      )}
+
+      {sampleResume && (
+        <section className="card mt-8 p-6 sm:p-8">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <p className="eyebrow">AI-generated draft</p>
+              <h2 className="mt-3 font-display text-2xl font-semibold">Your sample resume is ready</h2>
+              <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
+                Review every detail before using it. This draft is based on your uploaded resume and analysis; it does not add missing skills or qualifications.
+              </p>
+            </div>
+            <button type="button" onClick={() => downloadSampleResumePdf(sampleResume)} className="btn-primary no-print shrink-0">
+              <Download className="h-4 w-4" aria-hidden="true" />
+              Download sample PDF
+            </button>
+          </div>
+          <div className="mt-7 rounded-xl border border-line bg-white p-6 text-slate-800 sm:p-8">
+            <h3 className="text-2xl font-bold">{sampleResume.fullName || 'Sample Resume'}</h3>
+            {sampleResume.headline && <p className="mt-1 text-sm font-semibold text-indigo-700">{sampleResume.headline}</p>}
+            <p className="mt-2 text-xs text-slate-500">
+              {[sampleResume.contact?.email, sampleResume.contact?.phone, sampleResume.contact?.location, ...(sampleResume.contact?.links || [])].filter(Boolean).join(' | ')}
+            </p>
+            {sampleResume.summary && <><h4 className="mt-6 border-b border-slate-200 pb-1 text-xs font-bold uppercase tracking-wider text-indigo-700">Professional Summary</h4><p className="mt-2 whitespace-pre-line text-sm">{sampleResume.summary}</p></>}
+            {sampleResume.skills?.length > 0 && <><h4 className="mt-5 border-b border-slate-200 pb-1 text-xs font-bold uppercase tracking-wider text-indigo-700">Skills</h4><p className="mt-2 text-sm">{sampleResume.skills.join(' • ')}</p></>}
+            {sampleResume.experience?.length > 0 && <><h4 className="mt-5 border-b border-slate-200 pb-1 text-xs font-bold uppercase tracking-wider text-indigo-700">Experience</h4>{sampleResume.experience.map((item, i) => <div key={i} className="mt-3"><p className="text-sm font-semibold">{[item.role, item.company].filter(Boolean).join(' | ')}</p>{item.dates && <p className="text-xs text-slate-500">{item.dates}</p>}<ul className="mt-1 list-disc space-y-1 pl-5 text-sm">{(item.bullets || []).map((bullet, j) => <li key={j}>{bullet}</li>)}</ul></div>)}</>}
+            {sampleResume.projects?.length > 0 && <><h4 className="mt-5 border-b border-slate-200 pb-1 text-xs font-bold uppercase tracking-wider text-indigo-700">Projects</h4>{sampleResume.projects.map((item, i) => <div key={i} className="mt-3"><p className="text-sm font-semibold">{item.name}</p><p className="mt-1 text-sm">{item.description}</p>{item.technologies && <p className="mt-1 text-xs text-slate-500">Technologies: {item.technologies}</p>}</div>)}</>}
+            {sampleResume.education?.length > 0 && <><h4 className="mt-5 border-b border-slate-200 pb-1 text-xs font-bold uppercase tracking-wider text-indigo-700">Education</h4>{sampleResume.education.map((item, i) => <div key={i} className="mt-3"><p className="text-sm font-semibold">{[item.degree, item.institution].filter(Boolean).join(' | ')}</p>{item.dates && <p className="text-xs text-slate-500">{item.dates}</p>}{item.details && <p className="mt-1 text-sm">{item.details}</p>}</div>)}</>}
+            {sampleResume.certifications?.length > 0 && <><h4 className="mt-5 border-b border-slate-200 pb-1 text-xs font-bold uppercase tracking-wider text-indigo-700">Certifications</h4><ul className="mt-2 list-disc pl-5 text-sm">{sampleResume.certifications.map((item, i) => <li key={i}>{item}</li>)}</ul></>}
+            {(sampleResume.additionalSections || []).map((section, i) => <div key={i}><h4 className="mt-5 border-b border-slate-200 pb-1 text-xs font-bold uppercase tracking-wider text-indigo-700">{section.title}</h4><p className="mt-2 whitespace-pre-line text-sm">{section.items}</p></div>)}
+          </div>
+        </section>
+      )}
 
       {/* Summary stats */}
       <div className="mt-10 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">

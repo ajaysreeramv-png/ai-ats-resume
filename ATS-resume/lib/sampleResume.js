@@ -22,8 +22,14 @@ export function validateSampleResume(raw) {
     },
     summary: cleanText(raw.summary, 1200),
     skills: cleanList(raw.skills, 30, 100),
-    experience: cleanObjects(raw.experience, [['role', 160], ['company', 160], ['dates', 100], ['bullets', 1000]], 8)
-      .map((item, index) => ({ ...item, bullets: cleanList(raw.experience[index]?.bullets, 6, 300) })),
+    experience: Array.isArray(raw.experience)
+      ? raw.experience.filter((item) => item && typeof item === 'object').slice(0, 8).map((item) => ({
+          role: cleanText(item.role, 160),
+          company: cleanText(item.company, 160),
+          dates: cleanText(item.dates, 100),
+          bullets: cleanList(item.bullets, 6, 300),
+        }))
+      : [],
     education: cleanObjects(raw.education, [['degree', 160], ['institution', 180], ['dates', 100], ['details', 400]], 6),
     projects: cleanObjects(raw.projects, [['name', 160], ['description', 600], ['technologies', 240]], 8),
     certifications: cleanList(raw.certifications, 12, 180),

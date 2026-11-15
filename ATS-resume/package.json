@@ -11,7 +11,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "test": "node tests/api.test.mjs && node tests/contract.test.mjs",
-    "check:gemini": "node scripts/check-openrouter.mjs"
+    "check:gemini": "node scripts/check-gemini.mjs"
   },
   "dependencies": {
     "lucide-react": "^0.468.0",

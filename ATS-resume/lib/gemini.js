@@ -2,7 +2,7 @@
 // Never return API keys, prompts, resume text, or raw provider responses to the browser.
 
 export const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models';
-export const DEFAULT_MODEL = 'gemini-2.5-flash';
+export const DEFAULT_MODEL = 'gemini-3.5-flash-lite';
 
 export class AiError extends Error {
   constructor({ code, status, message, retryable = false, upstreamStatus = null, diagnostics = null }) {

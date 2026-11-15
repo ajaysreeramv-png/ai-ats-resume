@@ -2,11 +2,7 @@ import { LIMITS } from '../lib/limits.js';
 import { DEFAULT_MODEL } from '../lib/openrouter.js';
 import { runAnalysis, toAiError } from '../lib/runAnalysis.js';
 
-// POST /api/analyze
-// Body: { resumeText: string, jobDescription: string }
-// Response 200: { analysis, model }   Error: { error: { code, message } }
-// Never logs resume or job description content. Logs error codes only.
-
+// POST /api/analyze. Never log resume or job-description content.
 function send(res, status, body) {
   res.status(status).setHeader('Content-Type', 'application/json');
   res.setHeader('Cache-Control', 'no-store');
@@ -58,19 +54,21 @@ export default async function handler(req, res) {
     return fail(res, 413, 'RESUME_TOO_LONG', 'The resume text is too long. Shorten the resume and try again.');
   }
   if (jobDescription.length < LIMITS.jdMinChars) {
-    return fail(res, 400, 'JOB_DESCRIPTION_TOO_SHORT', `The job description needs at least ${LIMITS.jdMinChars} characters.`);
+    return fail(res, 400, 'JOB_DESCRIPTION_TOO_SHORT', \`The job description needs at least \${LIMITS.jdMinChars} characters.\`);
   }
   if (jobDescription.length > LIMITS.jdMaxChars) {
-    return fail(res, 413, 'JOB_DESCRIPTION_TOO_LONG', `The job description is longer than ${LIMITS.jdMaxChars.toLocaleString()} characters. Remove extra text and try again.`);
+    return fail(res, 413, 'JOB_DESCRIPTION_TOO_LONG', \`The job description is longer than \${LIMITS.jdMaxChars.toLocaleString()} characters. Remove extra text and try again.\`);
   }
 
+  const startedAt = Date.now();
   try {
     const result = await runAnalysis({ apiKey, model, resumeText, jobDescription });
+    console.info(\`analyze completed: duration_ms=\${Date.now() - startedAt} model=\${model}\`);
     return send(res, 200, result);
   } catch (err) {
     const aiError = toAiError(err);
     console.error(
-      `analyze failed: code=${aiError.code} status=${aiError.status}${aiError.upstreamStatus ? ` upstream=${aiError.upstreamStatus}` : ''} model=${model}`
+      \`analyze failed: code=\${aiError.code} status=\${aiError.status}\${aiError.upstreamStatus ? \` upstream=\${aiError.upstreamStatus}\` : ''} duration_ms=\${Date.now() - startedAt} model=\${model}\`
     );
     return fail(res, aiError.status, aiError.code, aiError.message);
   }

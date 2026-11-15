@@ -1,4 +1,4 @@
-import { AiError, DEFAULT_MODEL, callOpenRouter } from './openrouter.js';
+import { AiError, DEFAULT_MODEL, callGemini } from './openrouter.js';
 import { buildMessages } from './prompt.js';
 import { validateAnalysis, AnalysisValidationError } from './validateAnalysis.js';
 
@@ -66,7 +66,7 @@ export async function runAnalysis({ apiKey, model = DEFAULT_MODEL, resumeText, j
 
   for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt += 1) {
     try {
-      const result = await callOpenRouter({ apiKey, model, messages, deadline });
+      const result = await callGemini({ apiKey, model, messages, deadline });
       const raw = parseModelJson(result.content, result.diagnostics);
       const analysis = validateAnalysis(raw);
       return { analysis, model: result.diagnostics?.returnedModel || model };

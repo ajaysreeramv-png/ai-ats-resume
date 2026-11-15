@@ -1,8 +1,14 @@
+import { useState } from 'react';
+import { generateSampleResume } from '../services/sampleResumeService.js';
+import { downloadSampleResumePdf } from '../utils/downloadSampleResumePdf.js';
 import {
   AlertTriangle,
   Briefcase,
   CheckCircle2,
   FileSearch,
+  FileText,
+  Download,
+  Loader2,
   Gauge,
   Info,
   Lightbulb,
@@ -123,7 +129,25 @@ function StatCard({ icon: Icon, label, value, sub }) {
   );
 }
 
-export default function ResultsDashboard({ analysis: a, onReset }) {
+export default function ResultsDashboard({ analysis: a, resumeText, onReset }) {
+  const [sampleResume, setSampleResume] = useState(null);
+  const [generatingSample, setGeneratingSample] = useState(false);
+  const [sampleError, setSampleError] = useState('');
+
+  async function handleGenerateSample() {
+    if (generatingSample || sampleResume) return;
+    setGeneratingSample(true);
+    setSampleError('');
+    try {
+      const generated = await generateSampleResume({ resumeText, analysis: a });
+      setSampleResume(generated);
+    } catch (error) {
+      setSampleError(error.message || 'Could not generate the sample resume. Please try again.');
+    } finally {
+      setGeneratingSample(false);
+    }
+  }
+
   const highPriority = a.recommendedActions.filter((r) => r.priority === 'High').length;
 
   return (

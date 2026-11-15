@@ -1,6 +1,6 @@
 // Live check: calls Google Gemini with a sample resume and validates the reply.
 // Usage: GEMINI_API_KEY=... npm run check:gemini
-// Optional: GEMINI_MODEL=... (defaults to gemini-2.5-flash). Prints no resume content and no key.
+// Optional: GEMINI_MODEL=... (defaults to gemini-3.5-flash-lite). Prints no resume content and no key.
 import { runAnalysis } from '../lib/runAnalysis.js';
 import { DEFAULT_MODEL } from '../lib/gemini.js';
 

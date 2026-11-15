@@ -64,8 +64,10 @@ export async function runAnalysis({ apiKey, model = DEFAULT_MODEL, resumeText, j
     } catch (err) {
       lastError = toAiError(err);
       const timeLeft = deadline - Date.now();
-      if (!lastError.retryable || attempt === MAX_ATTEMPTS || timeLeft < MIN_TIME_FOR_RETRY_MS) break;
-      await sleep(1500);
+      // A hard timeout is not retried: another call to the same free router is
+      // unlikely to finish inside the remaining Vercel execution window.
+      if (lastError.code === 'AI_TIMEOUT' || !lastError.retryable || attempt === MAX_ATTEMPTS || timeLeft < MIN_TIME_FOR_RETRY_MS) break;
+      await sleep(Math.min(1000, Math.max(0, timeLeft - MIN_TIME_FOR_RETRY_MS)));
     }
   }
   throw lastError;

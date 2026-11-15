@@ -56,7 +56,7 @@ export async function callOpenRouter({ apiKey, model, messages, deadline, jsonMo
   const timeoutError = () => new AiError({ code: 'AI_TIMEOUT', status: 504, message: 'The analysis took too long. Try again in a moment.', retryable: false });
 
   try {
-    const body = { model, messages, temperature: 0.1, max_tokens: 3000 };
+    const body = { model, messages, temperature: 0.1, max_tokens: 2200 };
     if (jsonMode) body.response_format = { type: 'json_object' };
 
     let response;

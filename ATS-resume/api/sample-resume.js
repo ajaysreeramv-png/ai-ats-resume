@@ -51,14 +51,28 @@ export default async function handler(req, res) {
   }
 
   const startedAt = Date.now();
+  const deadline = startedAt + 48_000;
+  const messages = buildSampleResumeMessages(resumeText, analysis);
+  const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+  let sampleResume;
+  let lastError;
+
+  // Gemini can return 503 during temporary capacity spikes. Retry once with backoff.
+  for (let attempt = 1; attempt <= 2; attempt += 1) {
+    try {
+      const result = await callGemini({ apiKey, model, messages, deadline });
+      sampleResume = validateSampleResume(parseModelJson(result.content, result.diagnostics));
+      lastError = null;
+      break;
+    } catch (err) {
+      lastError = toAiError(err);
+      if (!lastError.retryable || attempt === 2 || deadline - Date.now() < 5_000) break;
+      await sleep(1_000);
+    }
+  }
+
   try {
-    const result = await callGemini({
-      apiKey,
-      model,
-      messages: buildSampleResumeMessages(resumeText, analysis),
-      deadline: startedAt + 48_000,
-    });
-    const sampleResume = validateSampleResume(parseModelJson(result.content, result.diagnostics));
+    if (lastError) throw lastError;
     if (!sampleResume.fullName && !sampleResume.summary && !sampleResume.skills.length &&
         !sampleResume.experience.length && !sampleResume.education.length && !sampleResume.projects.length) {
       return fail(res, 502, 'EMPTY_SAMPLE', 'The AI could not build a sample from this resume. Please try again.');

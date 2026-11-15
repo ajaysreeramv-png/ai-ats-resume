@@ -2,7 +2,7 @@ import { LIMITS } from '../lib/limits.js';
 import { DEFAULT_MODEL } from '../lib/openrouter.js';
 import { runAnalysis, toAiError } from '../lib/runAnalysis.js';
 
-// POST /api/analyze. Never log resume or job-description content.
+// POST /api/analyze. Never log resume text, job-description text, or API keys.
 function send(res, status, body) {
   res.status(status).setHeader('Content-Type', 'application/json');
   res.setHeader('Cache-Control', 'no-store');
@@ -59,12 +59,16 @@ export default async function handler(req, res) {
     return send(res, 200, result);
   } catch (err) {
     const aiError = toAiError(err);
+    const safeDiagnostics = aiError.diagnostics
+      ? JSON.stringify(aiError.diagnostics)
+      : '{}';
     console.error(
       'analyze failed: code=' + aiError.code +
       ' status=' + aiError.status +
       (aiError.upstreamStatus ? ' upstream=' + aiError.upstreamStatus : '') +
       ' duration_ms=' + (Date.now() - startedAt) +
-      ' model=' + model
+      ' model=' + model +
+      ' diagnostics=' + safeDiagnostics
     );
     return fail(res, aiError.status, aiError.code, aiError.message);
   }

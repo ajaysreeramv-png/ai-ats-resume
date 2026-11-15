@@ -1,15 +1,15 @@
-// Live check: calls the real OpenRouter API with a sample resume and validates the reply.
-// Usage: OPENROUTER_API_KEY=sk-or-... npm run check:openrouter
-// Optional: OPENROUTER_MODEL=... (defaults to openrouter/free). Prints no resume content and no key.
+// Live check: calls Google Gemini with a sample resume and validates the reply.
+// Usage: GEMINI_API_KEY=... npm run check:gemini
+// Optional: GEMINI_MODEL=... (defaults to gemini-2.5-flash). Prints no resume content and no key.
 import { runAnalysis } from '../lib/runAnalysis.js';
 import { DEFAULT_MODEL } from '../lib/openrouter.js';
 
-const apiKey = process.env.OPENROUTER_API_KEY?.trim();
+const apiKey = process.env.GEMINI_API_KEY?.trim();
 if (!apiKey) {
-  console.error('Set OPENROUTER_API_KEY first.');
+  console.error('Set GEMINI_API_KEY first.');
   process.exit(1);
 }
-const model = process.env.OPENROUTER_MODEL?.trim() || DEFAULT_MODEL;
+const model = process.env.GEMINI_MODEL?.trim() || DEFAULT_MODEL;
 
 const resumeText = `Alex Morgan
 Frontend Developer
@@ -28,9 +28,8 @@ try {
   const started = Date.now();
   const { analysis, model: used } = await runAnalysis({ apiKey, model, resumeText, jobDescription });
   const seconds = ((Date.now() - started) / 1000).toFixed(1);
-  console.log(`PASS  OpenRouter returned valid analysis from model "${used}" in ${seconds}s`);
+  console.log(`PASS  Gemini returned valid analysis from model "${used}" in ${seconds}s`);
   console.log(`      ATS score: ${analysis.atsScore}/100, skills match: ${analysis.skillsMatch.matchPercentage}%`);
-  console.log(`      Sections: ${Object.keys(analysis).length} top-level fields, ${analysis.recommendedActions.length} recommended actions`);
 } catch (err) {
   console.error(`FAIL  ${err.code ?? 'ERROR'}: ${err.message}`);
   process.exit(1);

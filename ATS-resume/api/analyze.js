@@ -1,5 +1,5 @@
 import { LIMITS } from '../lib/limits.js';
-import { DEFAULT_MODEL } from '../lib/openrouter.js';
+import { DEFAULT_MODEL } from '../lib/gemini.js';
 import { runAnalysis, toAiError } from '../lib/runAnalysis.js';
 
 // POST /api/analyze. Never log resume text, job-description text, or API keys.

@@ -1,4 +1,4 @@
-import { AiError, DEFAULT_MODEL, callGemini } from './openrouter.js';
+import { AiError, DEFAULT_MODEL, callGemini } from './gemini.js';
 import { buildMessages } from './prompt.js';
 import { validateAnalysis, AnalysisValidationError } from './validateAnalysis.js';
 

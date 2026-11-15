@@ -34,7 +34,7 @@ function mockRes() {
 const validBody = { resumeText, jobDescription };
 const geminiResponse = (text) => ({
   candidates: [{ content: { parts: [{ text }], role: 'model' }, finishReason: 'STOP' }],
-  modelVersion: 'gemini-2.5-flash',
+  modelVersion: 'gemini-3.5-flash-lite',
   usageMetadata: { promptTokenCount: 100, candidatesTokenCount: 200 },
 });
 async function run(body = validBody, method = 'POST') {
@@ -69,9 +69,9 @@ await check('successful Gemini response returns validated analysis', async () =>
   };
   const r = await run();
   assert.equal(r.status, 200);
-  assert.equal(r.data.model, 'gemini-2.5-flash');
+  assert.equal(r.data.model, 'gemini-3.5-flash-lite');
   assert.equal(r.data.analysis.scoreBreakdown.length, RUBRIC.length);
-  assert.equal(captured.url, 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent');
+  assert.equal(captured.url, 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent');
   assert.equal(captured.opts.headers['x-goog-api-key'], 'test-key-123');
   const sent = JSON.parse(captured.opts.body);
   assert.equal(sent.generationConfig.responseMimeType, 'application/json');

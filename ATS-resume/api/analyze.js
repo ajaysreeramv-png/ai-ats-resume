@@ -27,10 +27,10 @@ export default async function handler(req, res) {
     return fail(res, 405, 'METHOD_NOT_ALLOWED', 'Use POST to analyze a resume.');
   }
 
-  const apiKey = process.env.OPENROUTER_API_KEY && process.env.OPENROUTER_API_KEY.trim();
-  if (!apiKey) return fail(res, 500, 'SERVER_CONFIG', 'The server is not configured yet. The site owner must set OPENROUTER_API_KEY.');
+  const apiKey = process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY.trim();
+  if (!apiKey) return fail(res, 500, 'SERVER_CONFIG', 'The server is not configured yet. The site owner must set GEMINI_API_KEY.');
 
-  const model = (process.env.OPENROUTER_MODEL && process.env.OPENROUTER_MODEL.trim()) || DEFAULT_MODEL;
+  const model = (process.env.GEMINI_MODEL && process.env.GEMINI_MODEL.trim()) || DEFAULT_MODEL;
   const body = parseBody(req.body);
   if (!body) return fail(res, 400, 'INVALID_REQUEST', 'The request could not be read. Refresh the page and try again.');
 
@@ -59,9 +59,7 @@ export default async function handler(req, res) {
     return send(res, 200, result);
   } catch (err) {
     const aiError = toAiError(err);
-    const safeDiagnostics = aiError.diagnostics
-      ? JSON.stringify(aiError.diagnostics)
-      : '{}';
+    const safeDiagnostics = aiError.diagnostics ? JSON.stringify(aiError.diagnostics) : '{}';
     console.error(
       'analyze failed: code=' + aiError.code +
       ' status=' + aiError.status +
